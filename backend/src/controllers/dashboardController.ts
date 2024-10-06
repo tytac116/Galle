@@ -19,12 +19,29 @@ export const getLaundryRooms = async (req: Request, res: Response) => {
   }
 };
 
-export const getVisitorSignIns = async (req: Request, res: Response) => {
+// Route to get all visitor sign-ins
+
+export const getAllVisitorSignIns = async (req: Request, res: Response) => {
   try {
-    const result = await pool.query('SELECT COUNT(*) AS visitor_count FROM visitor_sign_in');
-    res.json(result.rows[0]);
+      const result = await pool.query(
+          `SELECT first_name, last_name, student_number, external_visitor, phone_number, email, sign_in_time, sign_in_date, visited_person, subwarden
+          FROM visitor_sign_ins WHERE residence_name = 'Leo Marquard Hall' ORDER BY sign_in_time ASC;`
+      );
+      res.status(200).json(result.rows);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching visitor sign-in data' });
+      res.status(500).json({ error: "Failed to retrieve visitor sign-ins" });
+  }
+};
+
+// Route to get the total number of visitor sign-ins
+export const getVisitorSignInCount = async (req: Request, res: Response) => {
+  try {
+      const result = await pool.query(
+          `SELECT COUNT(*) as total_visitor_sign_ins FROM visitor_sign_ins WHERE residence_name = 'Leo Marquard Hall';`
+      );
+      res.status(200).json(result.rows[0]);
+  } catch (error) {
+      res.status(500).json({ error: "Failed to retrieve visitor sign-in count" });
   }
 };
 
