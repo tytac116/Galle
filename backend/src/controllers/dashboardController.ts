@@ -45,12 +45,39 @@ export const getVisitorSignInCount = async (req: Request, res: Response) => {
   }
 };
 
-export const getMaintenanceRequests = async (req: Request, res: Response) => {
+
+// Route to get the total number of outstanding maintenance requests
+export const getMaintenanceRequestCount = async (req: Request, res: Response) => {
   try {
-    const result = await pool.query('SELECT * FROM maintenance_requests WHERE status = $1', ['pending']);
-    res.json(result.rows);
+    const result = await pool.query('SELECT COUNT(*) as total_requests FROM maintenance_requests;'
+    );
+    res.status(200).json(result.rows[0]);
   } catch (error) {
-    res.status(500).json({ error: 'Error fetching maintenance requests' });
+    res.status(500).json({ error: 'Failed to retrieve maintenance request count' });
+  }
+};
+
+// Route to get all outstanding maintenance requests
+export const getAllMaintenanceRequests = async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        maintenance_request_id,
+        first_name,
+        last_name,
+        student_number,
+        subwarden,
+        issue,
+        description,
+        status,
+        logged_time,
+        residence
+      FROM maintenance_requests
+      ORDER BY logged_time ASC;
+    `);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve maintenance requests' });
   }
 };
 
